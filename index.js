@@ -1,7 +1,8 @@
 //config//
-const apikey = "env OPENAI_API_KEY";
-const orgkey = "env OPENAI_ORG";
-const oauth = "enter your custom password";
+const apikey = "Enter your OpenAI APIs";
+const orgkey = "Enter your ORGs key";
+const oauth = "type your custom password here";
+const openport = 80;//you can change port default port is 80
 //////////////////////////
 const express = require('express')
 const fetch = require('node-fetch')
@@ -84,12 +85,13 @@ app.get('/', async (req, res) => {
     const send = await getOpenAIResponsev3(user);
     console.log(send);
     res.send( "{" + `"msg req data": "${user}` + `","msg rep data": "${send},` +`"Backend api by stowe"` + "}");
-  } else {
+  }
+   else {
     res.status(500).send(`{"error": "Missing parameter: ver \n what do you want version to make respone? \n gpt-3.5-turbo or text-davinci-003"}`);
   }
 
 
 });
-app.listen(80, () => {
-  console.log(`Example app listening at http://localhost:80`)
+app.listen(openport, () => {
+  console.log(`Example app listening at http://localhost:${openport}`)
 })
