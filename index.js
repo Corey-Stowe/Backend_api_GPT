@@ -1,13 +1,15 @@
 //config//
-const apikey = "Enter your OpenAI APIs";
-const orgkey = "Enter your ORGs key";
-const oauth = "type your custom password here";
-const openport = 80;//you can change port default port is 80
+const apikey = "your API keys";
+const orgkey = "your 0RG keys";
+const port = 80;
 //////////////////////////
 const express = require('express')
 const fetch = require('node-fetch')
 const query = require('readline-sync')
 const app = express();
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 //gpt-3.5-turbo
 async function getOpenAIResponse(user) {
@@ -38,6 +40,7 @@ async function getOpenAIResponse(user) {
     return "Sorry, something went wrong!";
   }
 }
+
 //text-davinci-003
 async function getOpenAIResponsev3(user) {
   try {
@@ -57,7 +60,7 @@ async function getOpenAIResponsev3(user) {
     });
     const data = await response.json();
     const jsonString = JSON.stringify(data);
-const send = jsonString.slice(jsonString.indexOf('{"text":"'));
+    const send = jsonString.slice(jsonString.indexOf('{"text":"'));
     return send;
   } catch (error) {
     console.error(error);
@@ -66,32 +69,31 @@ const send = jsonString.slice(jsonString.indexOf('{"text":"'));
 }
 
 //key main api
-app.get('/', async (req, res) => {
-  const user = req.query.user;
-  if (user == "") {
+app.all('/', async (req, res) => {
+  const user = req.body.user || req.query.user;
+  if (!user) {
     return res.status(500).send("mày đéo hỏi tao cái gì sao tao biết trả lời ?");
   }
-  const authkey = req.query.authkey
-  const ver = req.query.ver
+  const authkey = req.body.authkey || req.query.authkey;
+  const ver = req.body.ver || req.query.ver;
   console.log("Got request:  " + user + "|" + ver + "|" + authkey);
-  if (authkey !== oauth) {
+  if (authkey !== "pk_live_51IkykwJJUWs67pm7krR6XyF") {
     return res.status(401).send(`{"error": "invalid authkey"}`);
   }
   if (ver == "gpt-3.5-turbo") {
     const send = await getOpenAIResponse(user);
     console.log(send);
-    res.send( "{" + `"msg req data": "${user}` + `","msg rep data": "${send},` +`"    Backend api by stowe"` + "}");
+    res.send("{" + `"msg req data": "${user}` + `","msg rep data": "${send},` + `"    Backend api by stowe"` + "}");
   } else if (ver == "text-davinci-003") {
     const send = await getOpenAIResponsev3(user);
     console.log(send);
-    res.send( "{" + `"msg req data": "${user}` + `","msg rep data": "${send},` +`"Backend api by stowe"` + "}");
-  }
-   else {
-    res.status(500).send(`{"error": "Missing parameter: ver \n what do you want version to make respone? \n gpt-3.5-turbo or text-davinci-003"}`);
+    res.send("{" + `"msg req data": "${user}"` + `"msg rep data": "${send}` + "Backend api by stowe" + "}");
+  } else {
+    res.send("missing param <br> what version do you want ?");
   }
 
 
 });
-app.listen(openport, () => {
-  console.log(`Example app listening at http://localhost:${openport}`)
+app.listen(port, () => {
+  console.log(`App was running at http://localhost:${port}`)
 })
