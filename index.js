@@ -67,6 +67,31 @@ async function getOpenAIResponsev3(user) {
     return "Sorry, something went wrong!";
   }
 }
+// create image
+async function generateImage(user) {
+  try {
+  const response = await fetch('https://api.openai.com/v1/images/generations', {
+  method: 'POST',
+  headers: {
+  'Content-Type': 'application/json',
+  'Authorization': 'Bearer ' + apikey,
+  'OpenAI-Organization': orgkey
+  },
+  body: JSON.stringify({
+  "model": "image-alpha-001",
+  "prompt": "<img src='" + user + "'>",
+  "num_images": 1,
+  "size": "1024x1024",
+  "response_format": "url"
+  })
+  });
+  const data = await response.json();
+  return data.data[0].url;
+  } catch (error) {
+  console.error(error);
+  return "Sorry, something went wrong!";
+  }
+  }
 
 //key main api
 app.all('/', async (req, res) => {
@@ -88,7 +113,13 @@ app.all('/', async (req, res) => {
     const send = await getOpenAIResponsev3(user);
     console.log(send);
     res.send("{" + `"msg req data": "${user}"` + `"msg rep data": "${send}` + "Backend api by stowe" + "}");
-  } else {
+
+  } else if (ver == "image-alpha-001") {
+    const send = await generateImage(user);
+    console.log(send);
+    res.send(send);
+  }
+  else {
     res.send("missing param <br> what version do you want ?");
   }
 
